@@ -16,3 +16,13 @@ class PieceEnum(Enum):
     KNIGHT = "N"
     QUEEN = "Q"
     KING = "K"
+
+
+PIECE_VALUE = {
+    PieceEnum.PAWN: 1,
+    PieceEnum.ROOK: 5,
+    PieceEnum.BISHOP: 3,
+    PieceEnum.KNIGHT: 3,
+    PieceEnum.QUEEN: 9,
+    PieceEnum.KING: 1000,
+}

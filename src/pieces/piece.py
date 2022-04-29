@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal, Set, Tuple
 
-from src.constants import NUM_OF_COLS, NUM_OF_ROWS, Color, PieceEnum
+from src.constants import NUM_OF_COLS, NUM_OF_ROWS, Color, PieceEnum, PIECE_VALUE
 
 
 @dataclass
@@ -19,6 +19,9 @@ class Piece:
     coordinates: Tuple[int, int]
     moves: Set[Tuple[int, int]]
     captures: Set[Tuple[int, int]]
+
+    def __post_init__(self) -> None:
+        self.value = PIECE_VALUE[self.name]
 
     def _is_valid_coordinates(self, coordinates: Tuple[int, int]) -> bool:
         row, col = coordinates

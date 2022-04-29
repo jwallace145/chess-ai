@@ -102,4 +102,6 @@ class Board:
                         break
                     else:
                         break
+                else:
+                    break
         return valid_moves
