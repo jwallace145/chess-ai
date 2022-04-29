@@ -23,20 +23,15 @@ class Board:
     def __post_init__(self) -> None:
         # insert pawns
         for col in range(NUM_OF_COLS):
-            self.place_piece(Pawn(Color.BLACK, (1, col)))
-            self.place_piece(Pawn(Color.WHITE, (6, col)))
+            self._place_piece(Pawn(Color.BLACK, (1, col)), (1, col))
+            self._place_piece(Pawn(Color.WHITE, (6, col)), (6, col))
 
         # insert other pieces
         for col, piece in enumerate(
             [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
         ):
-            self.place_piece(piece(Color.BLACK, (0, col)))
-            self.place_piece(piece(Color.WHITE, (7, col)))
-
-    def place_piece(self, piece: Piece) -> None:
-        if self.is_legal_move(piece.coordinates):
-            row, col = piece.coordinates
-            self._board[row][col] = piece
+            self._place_piece(piece(Color.BLACK, (0, col)), (0, col))
+            self._place_piece(piece(Color.WHITE, (7, col)), (7, col))
 
     def move_piece(self, src: Tuple[int, int], dest: Tuple[int, int]) -> None:
         if self.is_legal_move(dest):
@@ -89,14 +84,22 @@ class Board:
         self._board[row][col] = piece
 
     def get_valid_moves(self, coordinates: Tuple[int, int]) -> Set[Tuple[int, int]]:
+        row, col = coordinates
         piece = self._get_piece(coordinates)
 
         valid_moves = []
-        for move in piece.get_moves():
-            if self._is_vacant(move):
-                valid_moves.append(move)
-
-        for capture in piece.get_captures():
-            if self._is_capture(piece, capture):
-                valid_moves.append(capture)
+        for direction in piece.moves:
+            for move in direction:
+                row_offset, col_offset = move
+                new_row = row + row_offset
+                new_col = col + col_offset
+                new_coordinates = (new_row, new_col)
+                if self._is_valid_coordinates(new_coordinates):
+                    if self._is_vacant(new_coordinates):
+                        valid_moves.append(new_coordinates)
+                    elif self._is_capture(piece, new_coordinates):
+                        valid_moves.append(new_coordinates)
+                        break
+                    else:
+                        break
         return valid_moves

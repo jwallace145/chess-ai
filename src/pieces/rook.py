@@ -7,9 +7,10 @@ from src.pieces.piece import Piece
 class Rook(Piece):
     def __init__(self, color: str, coordinates: Tuple[int, int]) -> None:
         row, col = coordinates
-        self.moves = set([(row, c) for c in range(NUM_OF_COLS)])  # move right
-        self.moves.update(set([(row, -c) for c in range(NUM_OF_COLS)]))  # move left
-        self.moves.update(set([(r, col) for r in range(NUM_OF_ROWS)]))  # move down
-        self.moves.update(set([(-r, col) for r in range(NUM_OF_ROWS)]))  # move up
+        self.moves = []
+        self.moves.append([(row, c) for c in range(1, NUM_OF_COLS)])
+        self.moves.append([(row, -c) for c in range(1, NUM_OF_COLS)])
+        self.moves.append([(r, col) for r in range(1, NUM_OF_ROWS)])
+        self.moves.append([(-r, col) for r in range(1, NUM_OF_ROWS)])
         self.captures = self.moves
         super().__init__(PieceEnum.ROOK, color, coordinates, self.moves, self.captures)
