@@ -1,10 +1,12 @@
-from unittest.mock import NonCallableMagicMock
+import os
+from time import sleep
 from art import text2art
 from dataclasses import dataclass
 from src.board import Board
 from typing import List, Tuple
 from src.constants import NUM_OF_ROWS
 from src.constants import Color
+from src.exceptions import InvalidMove
 
 COL_TO_INT = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
 
@@ -14,9 +16,6 @@ class TerminalEngine:
     def __post_init__(self) -> None:
         self.board = Board()
         self.turn = Color.WHITE
-
-    def _find_piece(self, piece: str, coordinates: Tuple[int, int]) -> Tuple[int, int]:
-        pass
 
     def _convert_coordinates(self, coordinates: str) -> Tuple[int, int]:
         col, row = coordinates
@@ -39,16 +38,21 @@ class TerminalEngine:
 
         return (piece, coordinates)
 
-    def run(self) -> None:
-        print(text2art("Chess!"))
+    def _move_piece(self, piece: str, dest_coordinates: Tuple[int, int]) -> None:
+        try:
+            src_coordinates = self.board.find_piece_coordinates(piece, dest_coordinates)
+            self.board.move_piece(src_coordinates, dest_coordinates)
+            if self.board.is_check():
+                self.board.is_checkmate()
+            sleep(2)
+        except InvalidMove as e:
+            print(e)
+            sleep(5)
 
+    def run(self) -> None:
         while True:
-            print(f"{self.turn.name}'s turn")
+            os.system("cls||clear")
+            print(text2art("Chess!"))
             self.board.print_board()
             piece, dest_coordinates = self._get_move_from_user()
-            src_coordintates = self.board.find_piece_coordinates(
-                piece, dest_coordinates
-            )
-            print(src_coordintates)
-            self.board.move_piece(src_coordintates, dest_coordinates)
-            self.turn = Color.BLACK if self.turn == Color.WHITE else Color.WHITE
+            self._move_piece(piece, dest_coordinates)

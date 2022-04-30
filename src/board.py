@@ -9,12 +9,13 @@ from src.pieces.pawn import Pawn
 from src.pieces.piece import Piece
 from src.pieces.queen import Queen
 from src.pieces.rook import Rook
+from src.exceptions import InvalidMove
 
 
 @dataclass
 class Board:
 
-    _color: Literal[Color.BLACK, Color.WHITE] = Color.WHITE
+    _turn: Literal[Color.BLACK, Color.WHITE] = Color.WHITE
     _board: List[List[str]] = field(
         default_factory=lambda: [
             [None for _ in range(NUM_OF_COLS)] for _ in range(NUM_OF_ROWS)
@@ -38,8 +39,12 @@ class Board:
         if dest in self.get_valid_moves(src):
             piece = self._pickup_piece(src)
             self._place_piece(piece, dest)
+            self._turn = Color.BLACK if self._turn == Color.WHITE else Color.WHITE
+        else:
+            raise InvalidMove(dest)
 
     def print_board(self) -> None:
+        print(f"Current turn: {self._turn.name}")
         for row in range(NUM_OF_ROWS):
             print()
             for col in range(NUM_OF_COLS):
@@ -88,7 +93,7 @@ class Board:
 
         if len(possible_pieces) == 0:
             print("NO PIECES FOUND")
-            return
+            raise InvalidMove(dest_coordinates)
         elif len(possible_pieces) == 1:
             print("A PIECE FOUND")
             return possible_pieces[0]
@@ -127,3 +132,63 @@ class Board:
 
         # return set of valid moves and valid captures
         return valid_moves.union(valid_captures)
+
+    def is_check(self) -> bool:
+        for row in range(NUM_OF_ROWS):
+            for col in range(NUM_OF_COLS):
+                piece = self._get_piece((row, col))
+                if piece and str(piece) == self._turn.value + "K":
+                    print(f"king coordinates: ({row}, {col})")
+                    king_coordinates = (row, col)
+
+        enemy_team = Color.BLACK if self._turn == Color.WHITE else Color.WHITE
+
+        enemy_pieces = set()
+        for row in range(NUM_OF_ROWS):
+            for col in range(NUM_OF_COLS):
+                piece = self._get_piece((row, col))
+                if piece and str(piece).startswith(enemy_team.value):
+                    enemy_pieces.add((row, col))
+
+        enemy_valid_moves = set()
+        for enemy in enemy_pieces:
+            enemy_valid_moves.update(self.get_valid_moves(enemy))
+
+        if king_coordinates in enemy_valid_moves:
+            return True
+        return False
+
+    def is_checkmate(self) -> bool:
+        # find current turn king
+        for row in range(NUM_OF_ROWS):
+            for col in range(NUM_OF_COLS):
+                piece = self._get_piece((row, col))
+                if piece and str(piece) == self._turn.value + "K":
+                    print(f"king coordinates: ({row}, {col})")
+                    king_coordinates = (row, col)
+
+        # get king valid moves
+        king_moves = self.get_valid_moves(king_coordinates)
+
+        enemy_team = Color.BLACK if self._turn == Color.WHITE else Color.WHITE
+
+        # get all the possible moves of enemy team
+        # get all enemy pieces on the board
+        enemy_pieces = set()
+        for row in range(NUM_OF_ROWS):
+            for col in range(NUM_OF_COLS):
+                piece = self._get_piece((row, col))
+                if piece and str(piece).startswith(enemy_team.value):
+                    enemy_pieces.add((row, col))
+
+        enemy_valid_moves = set()
+        for enemy in enemy_pieces:
+            enemy_valid_moves.update(self.get_valid_moves(enemy))
+
+        for move in king_moves:
+            if move not in enemy_valid_moves:
+                print("IT IS NOT A CHECKMATE")
+                return False
+
+        print("IT IS A CHECKMATE")
+        return True
