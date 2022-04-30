@@ -24,11 +24,11 @@ class Black(Team):
                 ]
             ),
             PieceEnum.ROOK: set([Rook(Color.BLACK, (0, 0)), Rook(Color.BLACK, (0, 7))]),
-            PieceEnum.BISHOP: set(
-                [Bishop(Color.BLACK, (0, 1)), Bishop(Color.BLACK, (0, 6))]
-            ),
             PieceEnum.KNIGHT: set(
                 [Knight(Color.BLACK, (0, 2)), Knight(Color.BLACK, (0, 5))]
+            ),
+            PieceEnum.BISHOP: set(
+                [Bishop(Color.BLACK, (0, 1)), Bishop(Color.BLACK, (0, 6))]
             ),
             PieceEnum.QUEEN: set([Queen(Color.BLACK, (0, 3))]),
             PieceEnum.KING: set([King(Color.BLACK, (0, 4))]),

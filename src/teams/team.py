@@ -11,7 +11,7 @@ class Team:
     color: Literal[Color.BLACK, Color.WHITE]
     pieces: Dict[PieceEnum, Set[Piece]]
 
-    def get_pieces(self) -> Set[Piece]:
+    def get_all_pieces(self) -> Set[Piece]:
         pieces = set()
         for pieces_set in self.pieces.values():
             for piece in pieces_set:
@@ -22,3 +22,6 @@ class Team:
         king = self.pieces.get(PieceEnum.KING).pop()
         self.pieces.get(PieceEnum.KING).add(king)
         return king
+
+    def get_pieces(self, piece: PieceEnum) -> Set[Piece]:
+        return self.pieces.get(piece)
