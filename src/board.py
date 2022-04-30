@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import List, Literal, Set, Tuple
 
 from src.constants import NUM_OF_COLS, NUM_OF_ROWS, Color
+from src.exceptions import InvalidMove
 from src.pieces.bishop import Bishop
 from src.pieces.king import King
 from src.pieces.knight import Knight
@@ -9,7 +10,8 @@ from src.pieces.pawn import Pawn
 from src.pieces.piece import Piece
 from src.pieces.queen import Queen
 from src.pieces.rook import Rook
-from src.exceptions import InvalidMove
+from src.teams.black import Black
+from src.teams.white import White
 
 
 @dataclass
@@ -23,17 +25,12 @@ class Board:
     )
 
     def __post_init__(self) -> None:
-        # insert pawns
-        for col in range(NUM_OF_COLS):
-            self._place_piece(Pawn(Color.BLACK, (1, col)), (1, col))
-            self._place_piece(Pawn(Color.WHITE, (6, col)), (6, col))
+        self.black = Black()
+        self.white = White()
 
-        # insert other pieces
-        for col, piece in enumerate(
-            [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
-        ):
-            self._place_piece(piece(Color.BLACK, (0, col)), (0, col))
-            self._place_piece(piece(Color.WHITE, (7, col)), (7, col))
+        for team in [self.black, self.white]:
+            for piece in team.get_pieces():
+                self._place_piece(piece, piece.coordinates)
 
     def move_piece(self, src: Tuple[int, int], dest: Tuple[int, int]) -> None:
         if dest in self.get_valid_moves(src):
@@ -134,56 +131,34 @@ class Board:
         return valid_moves.union(valid_captures)
 
     def is_check(self) -> bool:
-        for row in range(NUM_OF_ROWS):
-            for col in range(NUM_OF_COLS):
-                piece = self._get_piece((row, col))
-                if piece and str(piece) == self._turn.value + "K":
-                    print(f"king coordinates: ({row}, {col})")
-                    king_coordinates = (row, col)
-
-        enemy_team = Color.BLACK if self._turn == Color.WHITE else Color.WHITE
-
-        enemy_pieces = set()
-        for row in range(NUM_OF_ROWS):
-            for col in range(NUM_OF_COLS):
-                piece = self._get_piece((row, col))
-                if piece and str(piece).startswith(enemy_team.value):
-                    enemy_pieces.add((row, col))
+        if self._turn == Color.BLACK:
+            king = self.black.get_king()
+            enemy_pieces = self.white.get_pieces()
+        else:
+            king = self.white.get_king()
+            enemy_pieces = self.black.get_pieces()
 
         enemy_valid_moves = set()
         for enemy in enemy_pieces:
-            enemy_valid_moves.update(self.get_valid_moves(enemy))
+            enemy_valid_moves.update(self.get_valid_moves(enemy.coordinates))
 
-        if king_coordinates in enemy_valid_moves:
+        if king.coordinates in enemy_valid_moves:
             return True
         return False
 
     def is_checkmate(self) -> bool:
-        # find current turn king
-        for row in range(NUM_OF_ROWS):
-            for col in range(NUM_OF_COLS):
-                piece = self._get_piece((row, col))
-                if piece and str(piece) == self._turn.value + "K":
-                    print(f"king coordinates: ({row}, {col})")
-                    king_coordinates = (row, col)
+        if self._turn == Color.BLACK:
+            king = self.black.get_king()
+            enemy_pieces = self.white.get_pieces()
+        else:
+            king = self.white.get_king()
+            enemy_pieces = self.black.get_pieces()
 
-        # get king valid moves
-        king_moves = self.get_valid_moves(king_coordinates)
-
-        enemy_team = Color.BLACK if self._turn == Color.WHITE else Color.WHITE
-
-        # get all the possible moves of enemy team
-        # get all enemy pieces on the board
-        enemy_pieces = set()
-        for row in range(NUM_OF_ROWS):
-            for col in range(NUM_OF_COLS):
-                piece = self._get_piece((row, col))
-                if piece and str(piece).startswith(enemy_team.value):
-                    enemy_pieces.add((row, col))
+        king_moves = self.get_valid_moves(king.coordinates)
 
         enemy_valid_moves = set()
         for enemy in enemy_pieces:
-            enemy_valid_moves.update(self.get_valid_moves(enemy))
+            enemy_valid_moves.update(self.get_valid_moves(enemy.coordinates))
 
         for move in king_moves:
             if move not in enemy_valid_moves:

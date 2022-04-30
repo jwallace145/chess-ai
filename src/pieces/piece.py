@@ -82,6 +82,21 @@ class Piece:
             return True
         return False
 
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, Piece):
+            if (
+                o.color == self.color
+                and o.name == self.name
+                and o.coordinates == self.coordinates
+            ):
+                return True
+        return False
+
+    def __hash__(self) -> int:
+        return hash(
+            str(self.color.value) + str(self.name.value) + str(self.coordinates)
+        )
+
     def __str__(self) -> str:
         """Return the piece represented as a string.
 
