@@ -43,14 +43,6 @@ class Board:
         else:
             raise InvalidMove(dest)
 
-    def print_board(self) -> None:
-        print(f"Current turn: {self._turn.name}")
-        for row in range(NUM_OF_ROWS):
-            print()
-            for col in range(NUM_OF_COLS):
-                piece = self._board[row][col] if self._board[row][col] else "--"
-                print("| " + str(piece) + " |", end="")
-
     def _is_vacant(self, coordinates: Tuple[int, int]) -> bool:
         """Determine if the given cell is vacant or occupied.
 

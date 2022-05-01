@@ -6,7 +6,6 @@ from src.pieces.piece import Piece
 
 class Bishop(Piece):
     def __init__(self, color: str, coordinates: Tuple[int, int]) -> None:
-        row, col = coordinates
         self.moves = []
         self.moves.append([(i, i) for i in range(1, NUM_OF_ROWS)])  # diagonal up right
         self.moves.append([(i, -i) for i in range(1, NUM_OF_ROWS)])  # diagonal up left

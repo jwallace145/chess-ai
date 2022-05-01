@@ -26,3 +26,14 @@ PIECE_VALUE = {
     PieceEnum.QUEEN: 9,
     PieceEnum.KING: 1000,
 }
+
+COLUMNS = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
+
+PIECES = {
+    "p": PieceEnum.PAWN,
+    "r": PieceEnum.ROOK,
+    "b": PieceEnum.BISHOP,
+    "n": PieceEnum.KNIGHT,
+    "q": PieceEnum.QUEEN,
+    "k": PieceEnum.KING,
+}

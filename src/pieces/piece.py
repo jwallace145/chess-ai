@@ -83,6 +83,14 @@ class Piece:
         return False
 
     def __eq__(self, o: object) -> bool:
+        """Return whether piece object is equivalent to other object.
+
+        Args:
+            o (object): The other object.
+
+        Returns:
+            bool: True if the objects are equal. Otherwise, False.
+        """
         if isinstance(o, Piece):
             if (
                 o.color == self.color
@@ -93,6 +101,11 @@ class Piece:
         return False
 
     def __hash__(self) -> int:
+        """Return hash of piece.
+
+        Returns:
+            int: The hash of piece.
+        """
         return hash(
             str(self.color.value) + str(self.name.value) + str(self.coordinates)
         )

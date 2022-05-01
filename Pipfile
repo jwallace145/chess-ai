@@ -8,6 +8,10 @@ art = "*"
 
 [dev-packages]
 black = "*"
+pytest = "*"
+pylint = "*"
+flake8 = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.8"
