@@ -21,7 +21,15 @@ class Board:
         ]
     )
 
-    def __post_init__(self) -> None:
+    def initialize(self, black: Black = None, white: White = None) -> None:
+        # initialize starting pieces
+        if not black and not white:
+            self._black.initialize()
+            self._white.initialize()
+        else:
+            self._black = black
+            self._white = white
+
         pieces = self._black.get_all_pieces().union(self._white.get_all_pieces())
         for piece in pieces:
             self._place_piece(piece, piece.coordinates)
@@ -38,6 +46,7 @@ class Board:
         """
         if dest in self.get_valid_moves(src):
             piece = self._pickup_piece(src)
+            piece.has_moved = True
             self._place_piece(piece, dest)
             self._turn = Color.BLACK if self._turn == Color.WHITE else Color.WHITE
         else:
@@ -177,6 +186,79 @@ class Board:
         # return set of valid moves and valid captures
         return valid_moves.union(valid_captures)
 
+    def get_valid_castles(self) -> bool:
+        # check king has not moved
+        # check at least one of rooks have not moved
+        # check spaces between rook(s) and king are vacant
+        # check king is not in check
+        # check path king takes to castle does not put king in check
+        # return True if all the above is satisfied
+        if self._turn == Color.BLACK:
+            king = self._black.get_king()
+            rooks = self._black.get_pieces(PieceEnum.ROOK)
+        else:
+            king = self._white.get_king()
+            rooks = self._white.get_pieces(PieceEnum.ROOK)
+
+        if king.has_moved is True:
+            return []
+
+        rooks = [rook for rook in rooks if rook.has_moved is False]
+        if len(rooks) == 0:
+            return []
+
+        clear_path_to_rooks = []
+        for rook in rooks:
+            k_row, k_col = king.coordinates
+            r_row, r_col = rook.coordinates
+            if k_col > r_col:  # king is to right of rook
+                new_col = k_col - 1
+                while new_col != r_col:
+                    if not self._is_vacant((k_row, new_col)):
+                        break
+                    new_col -= 1
+                if new_col == r_col:
+                    clear_path_to_rooks.append(rook)
+            elif k_col < r_col:  # king is to left of rook
+                new_col = k_col + 1
+                while new_col != r_col:
+                    if not self._is_vacant((k_row, new_col)):
+                        break
+                    new_col += 1
+                if new_col == r_col:
+                    clear_path_to_rooks.append(rook)
+
+        if len(clear_path_to_rooks) == 0:
+            return []
+
+        if self.is_check():
+            return []
+
+        possible_castles = []
+        for rook in clear_path_to_rooks:
+            k_row, k_col = king.coordinates
+            r_row, r_col = rook.coordinates
+            if k_col > r_col:  # move king two spaces to left
+                for i in range(2):
+                    self.move_piece(king.coordinates, (k_row, k_col - i))
+                    if self.is_check():
+                        self.move_piece(king.coordinates, (k_row, k_col))
+                        break
+                if king.coordinates != (k_row, k_col):
+                    possible_castles.append(rook)
+                    self.move_piece(king.coordinates, (k_row, k_col))
+            elif k_col < r_col:  # move king two spaces to right
+                for i in range(2):
+                    self.move_piece(king.coordinates, (k_row, k_col + i + 1))
+                    if self.is_check():
+                        self.move_piece(king.coordinates, (k_row, k_col))
+                        break
+                if king.coordinates != (k_row, k_col):
+                    possible_castles.append(rook)
+                    self._place_piece(king, (k_row, k_col))
+
+        return possible_castles
+
     def is_check(self) -> bool:
         """Determines if current team is in a check position.
 
@@ -193,7 +275,7 @@ class Board:
         enemy_valid_moves = set()
         for enemy in enemy_pieces:
             enemy_valid_moves.update(self.get_valid_moves(enemy.coordinates))
-
+        print(enemy_valid_moves)
         if king.coordinates in enemy_valid_moves:
             return True
         return False

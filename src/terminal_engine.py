@@ -1,6 +1,7 @@
 import os
 from dataclasses import dataclass
 from typing import Tuple
+from src.utils import print_board
 
 from art import text2art
 
@@ -22,22 +23,8 @@ class TerminalEngine:
     """Terminal Chess Engine"""
 
     def __post_init__(self) -> None:
-        self.board = Board()  # initialize chess board
-
-    def _print_board(self) -> None:
-        """Print current chess board.
-
-        Args:
-            board (Board): The chess board.
-        """
-        print(f"Current turn: {self.board._turn.name}")
-        for row in range(NUM_OF_ROWS):
-            print()
-            for col in range(NUM_OF_COLS):
-                piece = (
-                    self.board._board[row][col] if self.board._board[row][col] else "--"
-                )
-                print("| " + str(piece) + " |", end="")
+        self.board = Board()
+        self.board.initialize()
 
     def _convert_coordinates(self, coordinates: str) -> Tuple[int, int]:
         """Convert coordinates of syntax e.g. e4 to row, col coordinates e.g. (4, 4).
@@ -131,7 +118,7 @@ class TerminalEngine:
             os.system("cls||clear")
             print(text2art("Chess!"))
 
-            self._print_board()
+            print_board(self.board)
 
             # get user input until valid move is given
             while True:
@@ -147,7 +134,7 @@ class TerminalEngine:
         os.system("cls||clear")
         print(text2art("Checkmate!"))
 
-        self._print_board()
+        print_board(self.board)
 
         winner = Color.BLACK if self.board._turn == Color.WHITE else Color.WHITE
 

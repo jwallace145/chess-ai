@@ -1,18 +1,14 @@
+from tests.utils.chess_board_reader import ChessBoardReader
 import pytest
-from src.board import Board
 from src.exceptions import InvalidMove
 
 
 class TestPawnMoves:
-    @pytest.fixture(autouse=True)
-    def init_test_pawn_moves(self) -> None:
-        self.board = Board()
-
-    def test_pawn_double_move(self) -> None:
-        for src, dest in [((6, 0), (4, 0)), ((1, 0), (3, 0))]:
-            self.board.move_piece(src, dest)
-
-    def test_pawn_double_move_after_move(self) -> None:
+    def test_pawn_double_move(self, chess_board_reader: ChessBoardReader) -> None:
+        board = chess_board_reader.read_chess_board(
+            "./tests/chessboards/start-position.txt"
+        )
+        board.move_piece((6, 0), (4, 0))
+        board.move_piece((1, 1), (3, 1))
         with pytest.raises(InvalidMove):
-            for src, dest in [((6, 7), (5, 7)), ((1, 7), (2, 7)), ((5, 7), (3, 7))]:
-                self.board.move_piece(src, dest)
+            board.move_piece((4, 0), (2, 0))

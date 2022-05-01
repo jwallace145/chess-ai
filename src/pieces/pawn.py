@@ -22,7 +22,7 @@ class Pawn(Piece):
                 MOVE_DOWN_RIGHT_DIAGONALLY_ONE,
                 MOVE_DOWN_LEFT_DIAGONALLY_ONE,
             ]
-        elif color == Color.WHITE:
+        else:
             self.moves = [MOVE_UP_ONE, MOVE_UP_TWO]
             self.captures = [
                 MOVE_UP_RIGHT_DIAGONALLY_ONE,
@@ -31,9 +31,9 @@ class Pawn(Piece):
         super().__init__(PieceEnum.PAWN, color, coordinates, self.moves, self.captures)
 
     def get_possible_moves(self) -> List[List[Tuple[int, int]]]:
-        row = self.coordinates[0]
-        if self.color == Color.BLACK and row != 1:
-            self.moves = [[(1, 0)]]
-        elif self.color == Color.WHITE and row != 6:
-            self.moves = [[(-1, 0)]]
+        if self.has_moved:
+            if self.color == Color.BLACK:
+                self.moves = [MOVE_DOWN_ONE]
+            else:
+                self.moves = [MOVE_UP_ONE]
         return super().get_possible_moves()

@@ -10,6 +10,9 @@ from src.teams.team import Team
 
 class White(Team):
     def __init__(self) -> None:
+        super().__init__(Color.WHITE)
+
+    def initialize(self) -> None:
         self.pieces = {
             PieceEnum.PAWN: set(
                 [
@@ -25,12 +28,12 @@ class White(Team):
             ),
             PieceEnum.ROOK: set([Rook(Color.WHITE, (7, 0)), Rook(Color.WHITE, (7, 7))]),
             PieceEnum.KNIGHT: set(
-                [Knight(Color.WHITE, (7, 2)), Knight(Color.WHITE, (7, 5))]
+                [Knight(Color.WHITE, (7, 1)), Knight(Color.WHITE, (7, 6))]
             ),
             PieceEnum.BISHOP: set(
-                [Bishop(Color.WHITE, (7, 1)), Bishop(Color.WHITE, (7, 6))]
+                [Bishop(Color.WHITE, (7, 2)), Bishop(Color.WHITE, (7, 5))]
             ),
             PieceEnum.QUEEN: set([Queen(Color.WHITE, (7, 3))]),
             PieceEnum.KING: set([King(Color.WHITE, (7, 4))]),
         }
-        super().__init__(Color.WHITE, self.pieces)
+        self.set_pieces(self.pieces)

@@ -20,6 +20,7 @@ class Piece:
     coordinates: Tuple[int, int]
     moves: List[List[Tuple[int, int]]]
     captures: List[List[Tuple[int, int]]]
+    has_moved: bool = False
 
     def __post_init__(self) -> None:
         self.value = PIECE_VALUE[self.name]
