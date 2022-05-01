@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Literal, Set, Tuple
+from typing import List, Literal, Tuple
 
 from src.constants import NUM_OF_COLS, NUM_OF_ROWS, PIECE_VALUE, Color, PieceEnum
 

@@ -2,18 +2,29 @@ from typing import Tuple
 
 from src.constants import PieceEnum
 from src.pieces.piece import Piece
+from src.pieces.moves import (
+    MOVE_UP_ONE,
+    MOVE_DOWN_ONE,
+    MOVE_LEFT_ONE,
+    MOVE_RIGHT_ONE,
+    MOVE_UP_RIGHT_DIAGONALLY_ONE,
+    MOVE_UP_LEFT_DIAGONALLY_ONE,
+    MOVE_DOWN_RIGHT_DIAGONALLY_ONE,
+    MOVE_DOWN_LEFT_DIAGONALLY_ONE,
+)
 
 
 class King(Piece):
     def __init__(self, color: str, coordinates: Tuple[int, int]) -> None:
         self.moves = [
-            [(-1, 0)],
-            [(1, 0)],
-            [(0, -1)],
-            [(0, 1)],
-            [(1, -1)],
-            [(1, 1)],
-            [(-1, -1)],
-            [(-1, 1)],
+            MOVE_UP_ONE,
+            MOVE_DOWN_ONE,
+            MOVE_LEFT_ONE,
+            MOVE_RIGHT_ONE,
+            MOVE_UP_RIGHT_DIAGONALLY_ONE,
+            MOVE_UP_LEFT_DIAGONALLY_ONE,
+            MOVE_DOWN_RIGHT_DIAGONALLY_ONE,
+            MOVE_DOWN_LEFT_DIAGONALLY_ONE,
         ]
-        super().__init__(PieceEnum.KING, color, coordinates, self.moves, self.moves)
+        self.captures = self.moves
+        super().__init__(PieceEnum.KING, color, coordinates, self.moves, self.captures)
