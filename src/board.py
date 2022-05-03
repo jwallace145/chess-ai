@@ -3,6 +3,7 @@ from typing import List, Literal, Set, Tuple
 
 from src.constants import NUM_OF_COLS, NUM_OF_ROWS, Color, PieceEnum
 from src.exceptions import InvalidMove
+from src.pieces.king import King
 from src.pieces.piece import Piece
 from src.teams.black import Black
 from src.teams.team import Team
@@ -12,7 +13,6 @@ from src.teams.white import White
 @dataclass
 class Board:
 
-    _turn: Literal[Color.BLACK, Color.WHITE] = Color.WHITE
     _black: Team = Black()
     _white: Team = White()
     _board: List[List[str]] = field(
@@ -21,12 +21,22 @@ class Board:
         ]
     )
 
-    def initialize(self, black: Black = None, white: White = None) -> None:
+    def initialize(
+        self,
+        black: Black = None,
+        white: White = None,
+        current_team: Team = None,
+        opposing_team: Team = None,
+    ) -> None:
         # initialize starting pieces
         if not black and not white:
+            self._current_team = self._white
+            self._opposing_team = self._black
             self._black.initialize()
             self._white.initialize()
         else:
+            self._current_team = current_team
+            self._opposing_team = opposing_team
             self._black = black
             self._white = white
 
@@ -44,11 +54,14 @@ class Board:
         Raises:
             InvalidMove: Raise an InvalidMove exception if the move is not valid.
         """
-        if dest in self.get_valid_moves(src):
+        if dest in self.get_moves(src):
             piece = self._pickup_piece(src)
             piece.has_moved = True
             self._place_piece(piece, dest)
-            self._turn = Color.BLACK if self._turn == Color.WHITE else Color.WHITE
+            self._current_team, self._opposing_team = (
+                self._opposing_team,
+                self._current_team,
+            )
         else:
             raise InvalidMove(dest)
 
@@ -136,14 +149,13 @@ class Board:
         Returns:
             Piece: The chess piece that can make to the given destination square.
         """
-        if self._turn == Color.BLACK:
-            pieces = self._black.get_pieces(piece)
-        else:
-            pieces = self._white.get_pieces(piece)
+        pieces = self._current_team.get_pieces(piece)
 
         possible_pieces = []
         for piece in pieces:
-            if dest_coordinates in self.get_valid_moves(piece.coordinates):
+            if dest_coordinates in self._get_valid_moves_and_captures(
+                piece.coordinates
+            ):
                 possible_pieces.append(piece)
 
         if len(possible_pieces) == 0:
@@ -154,11 +166,14 @@ class Board:
             print("MULTIPLE PIECES FOUND NOT GOOD")
             return possible_pieces[0]
 
-    def get_valid_moves(self, coordinates: Tuple[int, int]) -> Set[Tuple[int, int]]:
-        """Get the valid moves of a piece.
+    def _get_valid_moves_and_captures(
+        self, coordinates: Tuple[int, int]
+    ) -> Set[Tuple[int, int]]:
+        """Get the valid moves and captures of a given piece.
 
-        This method finds all the valid moves of a piece given its current coordinates. This
-        method accounts for the location of friendly and enemy pieces for moves and captures.
+        This method finds all the valid moves and captures of a piece given its current coordinates.
+        This method accounts for the location of friendly and enemy pieces for moves and captures.
+        However, this method does not account for possibly moving the king into an attacked square.
 
         Args:
             coordinates (Tuple[int, int]): The coordinates of the piece.
@@ -183,8 +198,28 @@ class Board:
                     valid_captures.add(move)
                     break
 
-        # return set of valid moves and valid captures
         return valid_moves.union(valid_captures)
+
+    def get_moves(self, coordinates: Tuple[int, int]) -> Set[Tuple[int, int]]:
+        """Get the moves of a piece at the given coordinates.
+
+        This method returns the set of valid moves and captures. This method accounts
+        for a King piece that cannot move into an attacked square.
+
+        Args:
+            coordinates (Tuple[int, int]): The coordinates of the given piece
+
+        Returns:
+            Set[Tuple[int, int]]: The set of valid moves and captures. Including the King parity.
+        """
+        moves = self._get_valid_moves_and_captures(coordinates)
+
+        # if the piece is a king, remove any possible move/capture that is attacked
+        piece = self._get_piece(coordinates)
+        if isinstance(piece, King):
+            moves = [move for move in moves if not self.is_under_attack(move)]
+
+        return moves
 
     def get_valid_castles(self) -> bool:
         # check king has not moved
@@ -193,20 +228,19 @@ class Board:
         # check king is not in check
         # check path king takes to castle does not put king in check
         # return True if all the above is satisfied
-        if self._turn == Color.BLACK:
-            king = self._black.get_king()
-            rooks = self._black.get_pieces(PieceEnum.ROOK)
-        else:
-            king = self._white.get_king()
-            rooks = self._white.get_pieces(PieceEnum.ROOK)
+        king = self._current_team.get_king()
+        rooks = self._current_team.get_pieces(PieceEnum.ROOK)
 
-        if king.has_moved is True:
+        # check if king has moved
+        if king.has_moved:
             return []
 
-        rooks = [rook for rook in rooks if rook.has_moved is False]
+        # check if rook(s) exist that have not moved
+        rooks = [rook for rook in rooks if not rook.has_moved]
         if len(rooks) == 0:
             return []
 
+        # check vacant path to rooks
         clear_path_to_rooks = []
         for rook in rooks:
             k_row, k_col = king.coordinates
@@ -227,11 +261,11 @@ class Board:
                     new_col += 1
                 if new_col == r_col:
                     clear_path_to_rooks.append(rook)
-
         if len(clear_path_to_rooks) == 0:
             return []
 
-        if self.is_check():
+        # check if king is under attack
+        if self.is_under_attack(king.coordinates):
             return []
 
         possible_castles = []
@@ -240,43 +274,40 @@ class Board:
             r_row, r_col = rook.coordinates
             if k_col > r_col:  # move king two spaces to left
                 for i in range(2):
-                    self.move_piece(king.coordinates, (k_row, k_col - i))
-                    if self.is_check():
-                        self.move_piece(king.coordinates, (k_row, k_col))
+                    try:
+                        self.move_piece(king.coordinates, (k_row, k_col - i - 1))
+                    except InvalidMove:
                         break
-                if king.coordinates != (k_row, k_col):
+                if king.coordinates == (k_row, k_col - 2):
                     possible_castles.append(rook)
                     self.move_piece(king.coordinates, (k_row, k_col))
             elif k_col < r_col:  # move king two spaces to right
                 for i in range(2):
-                    self.move_piece(king.coordinates, (k_row, k_col + i + 1))
-                    if self.is_check():
-                        self.move_piece(king.coordinates, (k_row, k_col))
+                    try:
+                        self.move_piece(king.coordinates, (k_row, k_col + i + 1))
+                    except InvalidMove:
                         break
-                if king.coordinates != (k_row, k_col):
+                if king.coordinates == (k_row, k_col + 2):
                     possible_castles.append(rook)
                     self._place_piece(king, (k_row, k_col))
 
         return possible_castles
 
-    def is_check(self) -> bool:
+    def is_under_attack(self, coordinates: Tuple[int, int]) -> bool:
         """Determines if current team is in a check position.
 
         Returns:
             bool: True if current team is in a check position. Otherwise, False.
         """
-        if self._turn == Color.BLACK:
-            king = self._black.get_king()
-            enemy_pieces = self._white.get_all_pieces()
-        else:
-            king = self._white.get_king()
-            enemy_pieces = self._black.get_all_pieces()
+        enemy_pieces = self._opposing_team.get_all_pieces()
 
         enemy_valid_moves = set()
         for enemy in enemy_pieces:
-            enemy_valid_moves.update(self.get_valid_moves(enemy.coordinates))
-        print(enemy_valid_moves)
-        if king.coordinates in enemy_valid_moves:
+            enemy_valid_moves.update(
+                self._get_valid_moves_and_captures(enemy.coordinates)
+            )
+
+        if coordinates in enemy_valid_moves:
             return True
         return False
 
@@ -286,18 +317,18 @@ class Board:
         Returns:
             bool: True if current team is in a checkmate position. Otherwise, False.
         """
-        if self._turn == Color.BLACK:
-            king = self._black.get_king()
-            enemy_pieces = self._white.get_all_pieces()
-        else:
-            king = self._white.get_king()
-            enemy_pieces = self._black.get_all_pieces()
+        king = self._current_team.get_king()
 
-        king_moves = self.get_valid_moves(king.coordinates)
+        if not self.is_under_attack(king.coordinates):
+            return False
+
+        enemy_pieces = self._opposing_team.get_all_pieces()
+
+        king_moves = self.get_moves(king.coordinates)
 
         enemy_valid_moves = set()
         for enemy in enemy_pieces:
-            enemy_valid_moves.update(self.get_valid_moves(enemy.coordinates))
+            enemy_valid_moves.update(self.get_moves(enemy.coordinates))
 
         for move in king_moves:
             if move not in enemy_valid_moves:
