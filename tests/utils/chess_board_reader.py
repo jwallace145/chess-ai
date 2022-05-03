@@ -24,7 +24,9 @@ PIECE_CONSTRUCTORS = {
 
 @dataclass
 class ChessBoardReader:
-    def read_chess_board(self, file_path: str) -> Board:
+    def read_chess_board(
+        self, file_path: str, current_team: Color = Color.WHITE
+    ) -> Board:
         self._board = Board()
         self._black = Black()
         self._white = White()
@@ -45,9 +47,7 @@ class ChessBoardReader:
             for col in range(NUM_OF_COLS):
                 square = chessboard[row][col]
 
-                if square == "--":
-                    continue
-                else:
+                if square != "--":
                     team, piece = square
                     if team == Color.BLACK.value:
                         self._black.add_piece(
@@ -60,6 +60,8 @@ class ChessBoardReader:
                             PIECE_CONSTRUCTORS[piece.lower()](Color.WHITE, (row, col)),
                         )
 
-        self._board.initialize(self._black, self._white)
+        current = self._white if current_team == Color.WHITE else self._black
+        opposing = self._black if current_team == Color.WHITE else self._white
+        self._board.initialize(self._black, self._white, current, opposing)
 
         return self._board

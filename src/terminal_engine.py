@@ -101,20 +101,12 @@ class TerminalEngine:
         except InvalidMove as e:
             print(e)
 
-    def _endgame(self) -> bool:
-        """Determines whether the given game is in an end state or not.
-
-        Returns:
-            bool: True if the game is in an end state. Otherwise, False.
-        """
-        return self.board.is_check() and self.board.is_checkmate()
-
     def run(self) -> None:
         """Run the chess engine.
 
         Play a PvP game of chess until a checkmate.
         """
-        while not self._endgame():
+        while not self.board.is_checkmate():
             os.system("cls||clear")
             print(text2art("Chess!"))
 
@@ -136,6 +128,4 @@ class TerminalEngine:
 
         print_board(self.board)
 
-        winner = Color.BLACK if self.board._turn == Color.WHITE else Color.WHITE
-
-        print(text2art(f"\n\n{winner.name} wins"))
+        print(text2art(f"\n\n{self.board._opposing_team.color.name} wins :)"))

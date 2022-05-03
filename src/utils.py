@@ -8,7 +8,7 @@ def print_board(board: Board) -> None:
     Args:
         board (Board): The chess board.
     """
-    print(f"Current turn: {board._turn.name}")
+    print(f"Current turn: {board._current_team.color.name}")
     for row in range(NUM_OF_ROWS):
         print()
         for col in range(NUM_OF_COLS):
