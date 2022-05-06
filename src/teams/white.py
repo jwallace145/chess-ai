@@ -6,13 +6,14 @@ from src.pieces.pawn import Pawn
 from src.pieces.queen import Queen
 from src.pieces.rook import Rook
 from src.teams.team import Team
+from typing_extensions import Self
 
 
 class White(Team):
     def __init__(self) -> None:
         super().__init__(Color.WHITE)
 
-    def initialize(self) -> None:
+    def initialize(self) -> Self:
         self.pieces = {
             PieceEnum.PAWN: set(
                 [
@@ -37,3 +38,4 @@ class White(Team):
             PieceEnum.KING: set([King(Color.WHITE, (7, 4))]),
         }
         self.set_pieces(self.pieces)
+        return self

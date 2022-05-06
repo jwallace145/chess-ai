@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from src.board import Board
 from src.constants import NUM_OF_COLS, NUM_OF_ROWS, PIECES, Color
@@ -24,12 +24,24 @@ PIECE_CONSTRUCTORS = {
 
 @dataclass
 class ChessBoardReader:
+    """Chess Board Reader"""
+
+    _board: Board = field(default_factory=lambda: Board())
+    _black: Team = field(default_factory=lambda: Black())
+    _white: Team = field(default_factory=lambda: White())
+
     def read_chess_board(
         self, file_path: str, current_team: Color = Color.WHITE
     ) -> Board:
-        self._board = Board()
-        self._black = Black()
-        self._white = White()
+        """Reads text file and returns chess board object with given configurations.
+
+        Args:
+            file_path (str): The file path to the text file chess board.
+            current_team (Color, optional): The current team of the chess board. Defaults to Color.WHITE.
+
+        Returns:
+            Board: The chess board that represents the given configurations.
+        """
         # loop over text chess board and create white and black teams
         chessboard = []
         for row in open(file_path, "r").readlines():
@@ -61,7 +73,6 @@ class ChessBoardReader:
                         )
 
         current = self._white if current_team == Color.WHITE else self._black
-        opposing = self._black if current_team == Color.WHITE else self._white
-        self._board.initialize(self._black, self._white, current, opposing)
+        self._board.initialize(self._black, self._white, current)
 
         return self._board

@@ -1,12 +1,14 @@
 from dataclasses import dataclass, field
-from typing import Literal, Dict, Set
+from typing import Dict, Literal, Set
+
 from src.constants import Color, PieceEnum
-from src.pieces.piece import Piece
 from src.pieces.king import King
+from src.pieces.piece import Piece
 
 
 @dataclass
 class Team:
+    """Chess Team Base Class"""
 
     color: Literal[Color.BLACK, Color.WHITE]
     pieces: Dict[PieceEnum, Set[Piece]] = field(

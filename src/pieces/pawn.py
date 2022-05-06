@@ -15,14 +15,14 @@ from src.pieces.piece import Piece
 
 
 class Pawn(Piece):
-    def __init__(self, color: str, coordinates: Tuple[int, int]) -> None:
+    def __init__(self, color: Color, coordinates: Tuple[int, int]) -> None:
         if color == Color.BLACK:
             self.moves = [MOVE_DOWN_ONE, MOVE_DOWN_TWO]
             self.captures = [
                 MOVE_DOWN_RIGHT_DIAGONALLY_ONE,
                 MOVE_DOWN_LEFT_DIAGONALLY_ONE,
             ]
-        else:
+        elif color == Color.WHITE:
             self.moves = [MOVE_UP_ONE, MOVE_UP_TWO]
             self.captures = [
                 MOVE_UP_RIGHT_DIAGONALLY_ONE,
@@ -34,6 +34,6 @@ class Pawn(Piece):
         if self.has_moved:
             if self.color == Color.BLACK:
                 self.moves = [MOVE_DOWN_ONE]
-            else:
+            elif self.color == Color.WHITE:
                 self.moves = [MOVE_UP_ONE]
         return super().get_possible_moves()

@@ -1,3 +1,4 @@
+from typing_extensions import Self
 from src.constants import Color, PieceEnum
 from src.pieces.bishop import Bishop
 from src.pieces.king import King
@@ -12,7 +13,7 @@ class Black(Team):
     def __init__(self) -> None:
         super().__init__(Color.BLACK)
 
-    def initialize(self) -> None:
+    def initialize(self) -> Self:
         self.pieces = {
             PieceEnum.PAWN: set(
                 [
@@ -37,3 +38,4 @@ class Black(Team):
             PieceEnum.KING: set([King(Color.BLACK, (0, 4))]),
         }
         self.set_pieces(self.pieces)
+        return self

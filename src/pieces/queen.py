@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from src.constants import PieceEnum
+from src.constants import PieceEnum, Color
 from src.pieces.moves import (
     MOVE_DOWN,
     MOVE_DOWN_LEFT_DIAGONALLY,
@@ -15,7 +15,7 @@ from src.pieces.piece import Piece
 
 
 class Queen(Piece):
-    def __init__(self, color: str, coordinates: Tuple[int, int]) -> None:
+    def __init__(self, color: Color, coordinates: Tuple[int, int]) -> None:
         self.moves = [
             MOVE_UP,
             MOVE_DOWN,

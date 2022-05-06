@@ -1,15 +1,20 @@
 from enum import Enum
 
+"""Chess Board Size"""
 NUM_OF_ROWS = 8
 NUM_OF_COLS = 8
 
 
 class Color(Enum):
+    """Chess Team Colors"""
+
     BLACK = "B"
     WHITE = "W"
 
 
 class PieceEnum(Enum):
+    """Chess Piece Name Enum"""
+
     PAWN = "P"
     ROOK = "R"
     BISHOP = "B"
@@ -18,6 +23,7 @@ class PieceEnum(Enum):
     KING = "K"
 
 
+"""Chess Piece Values Dictionary"""
 PIECE_VALUE = {
     PieceEnum.PAWN: 1,
     PieceEnum.ROOK: 5,
@@ -27,8 +33,11 @@ PIECE_VALUE = {
     PieceEnum.KING: 1000,
 }
 
+"""Chess Board Columns Dictionary"""
 COLUMNS = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
 
+
+"""Chess Board Piece Dictionary"""
 PIECES = {
     "p": PieceEnum.PAWN,
     "r": PieceEnum.ROOK,

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Literal, Tuple
+from typing import List, Literal, Tuple, Set
 
 from src.constants import NUM_OF_COLS, NUM_OF_ROWS, PIECE_VALUE, Color, PieceEnum
 
@@ -18,12 +18,19 @@ class Piece:
     ]
     color: Literal[Color.BLACK, Color.WHITE]
     coordinates: Tuple[int, int]
-    moves: List[List[Tuple[int, int]]]
-    captures: List[List[Tuple[int, int]]]
+    _moves: List[List[Tuple[int, int]]]
+    _captures: List[List[Tuple[int, int]]]
+    _valid_moves: Set[Tuple[int, int]] = None
     has_moved: bool = False
 
     def __post_init__(self) -> None:
         self.value = PIECE_VALUE[self.name]
+
+    def get_valid_moves(self) -> Set[Tuple[int, int]]:
+        return self._valid_moves
+
+    def set_valid_moves(self, valid_moves: Set[Tuple[int, int]]) -> None:
+        self._valid_moves = valid_moves
 
     def get_possible_moves(self) -> List[List[Tuple[int, int]]]:
         """Get possible moves given the piece's current coordinates and move vectors.
@@ -37,7 +44,7 @@ class Piece:
         """
         directions = []
         row, col = self.coordinates
-        for direction in self.moves:
+        for direction in self._moves:
             moves = []
             for row_offset, col_offset in direction:
                 new_row = row + row_offset
@@ -58,7 +65,7 @@ class Piece:
         """
         directions = []
         row, col = self.coordinates
-        for direction in self.captures:
+        for direction in self._captures:
             captures = []
             for row_offset, col_offset in direction:
                 new_row = row + row_offset

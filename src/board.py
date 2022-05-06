@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
-from typing import List, Literal, Set, Tuple
+from typing import List, Set, Tuple
 
-from src.constants import NUM_OF_COLS, NUM_OF_ROWS, Color, PieceEnum
+from src.constants import NUM_OF_COLS, NUM_OF_ROWS, PieceEnum
 from src.exceptions import InvalidMove
 from src.pieces.king import King
 from src.pieces.piece import Piece
+from src.pieces.pawn import Pawn
 from src.teams.black import Black
 from src.teams.team import Team
 from src.teams.white import White
@@ -15,36 +16,49 @@ class Board:
 
     _black: Team = Black()
     _white: Team = White()
-    _board: List[List[str]] = field(
+    _board: List[List[Piece]] = field(
         default_factory=lambda: [
             [None for _ in range(NUM_OF_COLS)] for _ in range(NUM_OF_ROWS)
         ]
     )
 
     def initialize(
-        self,
-        black: Black = None,
-        white: White = None,
-        current_team: Team = None,
-        opposing_team: Team = None,
+        self, black: Black = None, white: White = None, current_team: Team = None
     ) -> None:
-        # initialize starting pieces
-        if not black and not white:
-            self._current_team = self._white
-            self._opposing_team = self._black
-            self._black.initialize()
-            self._white.initialize()
-        else:
-            self._current_team = current_team
-            self._opposing_team = opposing_team
-            self._black = black
-            self._white = white
+        """Initialize black and white teams and set the board.
 
+        Set the black and white teams as well as the current team. Black and white teams
+        can be overridden for a nondefault configuration.
+
+        Args:
+            black (Black, optional): The black team. Defaults to None.
+            white (White, optional): The white team. Defaults to None.
+            current_team (Team, optional): The current team to make a move. Defaults to None.
+        """
+        # initialize black and white teams, override default if black/white provided
+        self._black = black if black else self._black.initialize()
+        self._white = white if white else self._white.initialize()
+        self._current_team = current_team if current_team else self._white
+        self._opposing_team = (
+            self._black if self._current_team == self._white else self._white
+        )
+
+        # place black and white pieces on board
         pieces = self._black.get_all_pieces().union(self._white.get_all_pieces())
         for piece in pieces:
             self._place_piece(piece, piece.coordinates)
 
-    def move_piece(self, src: Tuple[int, int], dest: Tuple[int, int]) -> None:
+        # calculate valid moves for black and white
+        self._calculate_moves()
+
+    def _calculate_moves(self) -> None:
+        for team in [self._black, self._white]:
+            pieces = team.get_all_pieces()
+            for piece in pieces:
+                valid_moves = self._get_valid_moves_and_captures(piece)
+                piece.set_valid_moves(valid_moves)
+
+    def move_piece(self, piece: Piece, dest: Tuple[int, int]) -> None:
         """Move chess piece to valid destination.
 
         Args:
@@ -54,14 +68,15 @@ class Board:
         Raises:
             InvalidMove: Raise an InvalidMove exception if the move is not valid.
         """
-        if dest in self.get_moves(src):
-            piece = self._pickup_piece(src)
-            piece.has_moved = True
+        if dest in piece.get_valid_moves():
+            piece = self._pickup_piece(piece.coordinates)
             self._place_piece(piece, dest)
+            piece.has_moved = True
             self._current_team, self._opposing_team = (
                 self._opposing_team,
                 self._current_team,
             )
+            self._calculate_moves()
         else:
             raise InvalidMove(dest)
 
@@ -153,9 +168,7 @@ class Board:
 
         possible_pieces = []
         for piece in pieces:
-            if dest_coordinates in self._get_valid_moves_and_captures(
-                piece.coordinates
-            ):
+            if dest_coordinates in piece.get_valid_moves():
                 possible_pieces.append(piece)
 
         if len(possible_pieces) == 0:
@@ -166,9 +179,7 @@ class Board:
             print("MULTIPLE PIECES FOUND NOT GOOD")
             return possible_pieces[0]
 
-    def _get_valid_moves_and_captures(
-        self, coordinates: Tuple[int, int]
-    ) -> Set[Tuple[int, int]]:
+    def _get_valid_moves_and_captures(self, piece: Piece) -> Set[Tuple[int, int]]:
         """Get the valid moves and captures of a given piece.
 
         This method finds all the valid moves and captures of a piece given its current coordinates.
@@ -181,8 +192,6 @@ class Board:
         Returns:
             Set[Tuple[int, int]]: The set of valid coordinates the piece can move to.
         """
-        piece = self._get_piece(coordinates)
-
         valid_moves = set()
         for direction in piece.get_possible_moves():
             for move in direction:
@@ -199,27 +208,6 @@ class Board:
                     break
 
         return valid_moves.union(valid_captures)
-
-    def get_moves(self, coordinates: Tuple[int, int]) -> Set[Tuple[int, int]]:
-        """Get the moves of a piece at the given coordinates.
-
-        This method returns the set of valid moves and captures. This method accounts
-        for a King piece that cannot move into an attacked square.
-
-        Args:
-            coordinates (Tuple[int, int]): The coordinates of the given piece
-
-        Returns:
-            Set[Tuple[int, int]]: The set of valid moves and captures. Including the King parity.
-        """
-        moves = self._get_valid_moves_and_captures(coordinates)
-
-        # if the piece is a king, remove any possible move/capture that is attacked
-        piece = self._get_piece(coordinates)
-        if isinstance(piece, King):
-            moves = [move for move in moves if not self.is_under_attack(move)]
-
-        return moves
 
     def get_valid_castles(self) -> bool:
         # check king has not moved
@@ -293,21 +281,17 @@ class Board:
 
         return possible_castles
 
-    def is_under_attack(self, coordinates: Tuple[int, int]) -> bool:
+    def is_under_attack(self, piece: Piece) -> bool:
         """Determines if current team is in a check position.
 
         Returns:
             bool: True if current team is in a check position. Otherwise, False.
         """
-        enemy_pieces = self._opposing_team.get_all_pieces()
-
         enemy_valid_moves = set()
-        for enemy in enemy_pieces:
-            enemy_valid_moves.update(
-                self._get_valid_moves_and_captures(enemy.coordinates)
-            )
+        for enemy in self._opposing_team.get_all_pieces():
+            enemy_valid_moves.update(enemy.get_valid_moves())
 
-        if coordinates in enemy_valid_moves:
+        if piece.coordinates in enemy_valid_moves:
             return True
         return False
 
@@ -319,18 +303,27 @@ class Board:
         """
         king = self._current_team.get_king()
 
-        if not self.is_under_attack(king.coordinates):
+        if not self.is_under_attack(king):
             return False
 
-        enemy_pieces = self._opposing_team.get_all_pieces()
-
-        king_moves = self.get_moves(king.coordinates)
-
         enemy_valid_moves = set()
-        for enemy in enemy_pieces:
-            enemy_valid_moves.update(self.get_moves(enemy.coordinates))
+        for enemy in self._opposing_team.get_all_pieces():
+            enemy_valid_moves.update(enemy.get_valid_moves())
 
-        for move in king_moves:
+        # king can escape itself
+        for move in king.get_valid_moves():
             if move not in enemy_valid_moves:
                 return False
+
+        friendly_moves = set()
+        for piece in self._current_team.get_all_pieces():
+            if not piece is not king:
+                friendly_moves.update(piece.get_valid_moves())
+
+        for move in friendly_moves:
+            self._place_piece(Pawn(self._current_team.color, move), move)
+            if not self.is_under_attack(king):
+                self._pickup_piece(move)
+                return False
+            self._pickup_piece(move)
         return True
