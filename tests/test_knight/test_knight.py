@@ -3,7 +3,7 @@ from src.utils.chess_board_reader import ChessBoardReader
 CHESS_BOARDS_DIR = "./tests/test_knight/chessboards/"
 
 
-def test_move(chess_board_reader: ChessBoardReader) -> None:
+def test_knight_move(chess_board_reader: ChessBoardReader) -> None:
     board = chess_board_reader.read_chess_board(
         file_path=f"{CHESS_BOARDS_DIR}knight-move.txt"
     )
@@ -31,7 +31,7 @@ def test_move(chess_board_reader: ChessBoardReader) -> None:
     }
 
 
-def test_capture(chess_board_reader: ChessBoardReader) -> None:
+def test_knight_capture(chess_board_reader: ChessBoardReader) -> None:
     board = chess_board_reader.read_chess_board(
         file_path=f"{CHESS_BOARDS_DIR}knight-capture.txt"
     )
