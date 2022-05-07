@@ -26,10 +26,10 @@ class Piece:
     def __post_init__(self) -> None:
         self.value = PIECE_VALUE[self.name]
 
-    def get_valid_moves(self) -> Set[Tuple[int, int]]:
+    def get_moves(self) -> Set[Tuple[int, int]]:
         return self._valid_moves
 
-    def set_valid_moves(self, valid_moves: Set[Tuple[int, int]]) -> None:
+    def set_moves(self, valid_moves: Set[Tuple[int, int]]) -> None:
         self._valid_moves = valid_moves
 
     def get_possible_moves(self) -> List[List[Tuple[int, int]]]:

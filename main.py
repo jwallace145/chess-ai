@@ -1,3 +1,3 @@
-from src.terminal_engine import TerminalEngine
+from src.utils.terminal_engine import TerminalEngine
 
 TerminalEngine().run()

@@ -23,6 +23,13 @@ class PieceEnum(Enum):
     KING = "K"
 
 
+class MenuOption(Enum):
+    """Terminal Menu Options"""
+
+    MOVE_A_PIECE = "move a piece"
+    GET_VALID_MOVES = "get valid moves"
+
+
 """Chess Piece Values Dictionary"""
 PIECE_VALUE = {
     PieceEnum.PAWN: 1,

@@ -1,6 +1,5 @@
 import pytest
-
-from tests.utils.chess_board_reader import ChessBoardReader
+from src.utils.chess_board_reader import ChessBoardReader
 
 
 @pytest.fixture

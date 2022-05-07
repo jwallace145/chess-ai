@@ -63,12 +63,10 @@ class ChessBoardReader:
                     team, piece = square
                     if team == Color.BLACK.value:
                         self._black.add_piece(
-                            PIECES[piece.lower()],
                             PIECE_CONSTRUCTORS[piece.lower()](Color.BLACK, (row, col)),
                         )
                     elif team == Color.WHITE.value:
                         self._white.add_piece(
-                            PIECES[piece.lower()],
                             PIECE_CONSTRUCTORS[piece.lower()](Color.WHITE, (row, col)),
                         )
 

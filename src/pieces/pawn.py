@@ -33,7 +33,7 @@ class Pawn(Piece):
     def get_possible_moves(self) -> List[List[Tuple[int, int]]]:
         if self.has_moved:
             if self.color == Color.BLACK:
-                self.moves = [MOVE_DOWN_ONE]
+                self._moves = [MOVE_DOWN_ONE]
             elif self.color == Color.WHITE:
-                self.moves = [MOVE_UP_ONE]
+                self._moves = [MOVE_UP_ONE]
         return super().get_possible_moves()

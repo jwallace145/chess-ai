@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 art = "*"
+simple-term-menu = "*"
 
 [dev-packages]
 black = "*"

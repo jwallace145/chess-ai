@@ -1,11 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List, Set, Tuple
 
-from src.constants import NUM_OF_COLS, NUM_OF_ROWS, PieceEnum
+from src.constants import NUM_OF_COLS, NUM_OF_ROWS, Color, PieceEnum
 from src.exceptions import InvalidMove
-from src.pieces.king import King
 from src.pieces.piece import Piece
-from src.pieces.pawn import Pawn
 from src.teams.black import Black
 from src.teams.team import Team
 from src.teams.white import White
@@ -13,6 +11,7 @@ from src.teams.white import White
 
 @dataclass
 class Board:
+    """Chess Board Class"""
 
     _black: Team = Black()
     _white: Team = White()
@@ -48,37 +47,30 @@ class Board:
         for piece in pieces:
             self._place_piece(piece, piece.coordinates)
 
-        # calculate valid moves for black and white
-        self._calculate_moves()
+        # calculate valid moves for opposing and current team
+        self._calculate_team_moves(self._opposing_team)
+        self._calculate_team_moves(self._current_team)
 
-    def _calculate_moves(self) -> None:
-        for team in [self._black, self._white]:
-            pieces = team.get_all_pieces()
-            for piece in pieces:
-                valid_moves = self._get_valid_moves_and_captures(piece)
-                piece.set_valid_moves(valid_moves)
+    def _calculate_team_moves(self, team: Team) -> None:
+        """Calculate moves for a given team.
 
-    def move_piece(self, piece: Piece, dest: Tuple[int, int]) -> None:
-        """Move chess piece to valid destination.
+        This method calculates all moves for a given team and should be called every
+        time the board is updated. Calculating the opposing team's moves first is ideal
+        in order to determine check and checkmate positions for current team.
 
         Args:
-            src (Tuple[int, int]): The coordinates of the chess piece.
-            dest (Tuple[int, int]): The coordinates of the desitination.
-
-        Raises:
-            InvalidMove: Raise an InvalidMove exception if the move is not valid.
+            team (Team): The given team. Black or White.
         """
-        if dest in piece.get_valid_moves():
-            piece = self._pickup_piece(piece.coordinates)
+        for piece in team.get_all_pieces():
+            moves = self._calculate_piece_moves(piece)
+            piece.set_moves(moves)
+
+    def _move_piece(self, piece: Piece, dest: Tuple[int, int]) -> None:
+        self._pickup_piece(piece)
+        if self._is_vacant(dest):
             self._place_piece(piece, dest)
-            piece.has_moved = True
-            self._current_team, self._opposing_team = (
-                self._opposing_team,
-                self._current_team,
-            )
-            self._calculate_moves()
-        else:
-            raise InvalidMove(dest)
+        elif self._is_capture(piece, dest):
+            self._capture_piece(piece, dest)
 
     def _is_vacant(self, coordinates: Tuple[int, int]) -> bool:
         """Determine if the given cell is vacant or occupied.
@@ -94,17 +86,17 @@ class Board:
             return True
         return False
 
-    def _is_capture(self, piece: Piece, coordinates: Tuple[int, int]) -> bool:
+    def _is_capture(self, piece: Piece, dest: Tuple[int, int]) -> bool:
         """Determine if moving the piece to the given destination cell is an enemy capture.
 
         Args:
             piece (Piece): The given chess piece.
-            coordinates (Tuple[int, int]): The destination coordinates of possible enemy capture.
+            dest (Tuple[int, int]): The destination coordinates of possible enemy capture.
 
         Returns:
-            bool: True if moving the given piece to the destination coordinates captures an enemy piece. Otherwise, False
+            bool: True if moving the given piece to the destination coordinates captures an enemy piece. Otherwise, False.
         """
-        enemy = self._get_piece(coordinates)
+        enemy = self._get_piece(dest)
         if enemy and enemy.color != piece.color:
             return True
         return False
@@ -122,7 +114,9 @@ class Board:
         row, col = coordinates
         return self._board[row][col]
 
-    def _pickup_piece(self, coordinates: Tuple[int, int]) -> Piece:
+    def _pickup_piece(
+        self, piece: Piece = None, coordinates: Tuple[int, int] = None
+    ) -> Piece:
         """Pick up and remove chess piece from given coordinates and return the chess piece.
 
         Args:
@@ -131,23 +125,39 @@ class Board:
         Returns:
             Piece: The chess piece at the given coordinates.
         """
-        row, col = coordinates
-        piece = self._board[row][col]
-        self._board[row][col] = None
-        return piece
+        if piece:
+            row, col = piece.coordinates
+            self._board[row][col] = None
+            return piece
+        elif coordinates:
+            row, col = coordinates
+            piece = self._board[row][col]
+            self._board[row][col] = None
+            return piece
+        else:
+            raise Exception
 
-    def _place_piece(self, piece: Piece, coordinates: Tuple[int, int]) -> None:
+    def _capture_piece(self, piece: Piece, dest: Tuple[int, int]) -> Piece:
+        captured_piece = self._get_piece(dest)
+        self._opposing_team.remove_piece(captured_piece)
+        self._place_piece(piece, dest)
+        return captured_piece
+
+    def _place_piece(self, piece: Piece, dest: Tuple[int, int]) -> None:
         """Place chess piece at the given coordinates.
+
+        This method does not check that the given coordinates are a valid move for the given piece.
+        This method updates the piece coordinates and places the piece on the board.
 
         Args:
             piece (Piece): The chess piece.
-            coordinates (Tuple[int, int]): The desired coordinates.
+            dest (Tuple[int, int]): The desired coordinates.
         """
-        piece.coordinates = coordinates
-        row, col = coordinates
+        piece.coordinates = dest
+        row, col = dest
         self._board[row][col] = piece
 
-    def find_piece(self, piece: PieceEnum, dest_coordinates: Tuple[int, int]) -> Piece:
+    def find_piece(self, piece: PieceEnum, dest: Tuple[int, int]) -> Piece:
         """Find chess piece given the type of chess piece and destination coordinates.
 
         This method is helpful for finding the desired chess piece given a move in the
@@ -155,7 +165,7 @@ class Board:
 
         Args:
             piece (PieceEnum): The type of chess piece
-            dest_coordinates (Tuple[int, int]): The destination coordinates of the given chess piece.
+            dest (Tuple[int, int]): The destination coordinates of the given chess piece.
 
         Raises:
             InvalidMove: Raises an InvalidMove exception if none of the current team pieces can move to the
@@ -164,22 +174,29 @@ class Board:
         Returns:
             Piece: The chess piece that can make to the given destination square.
         """
-        pieces = self._current_team.get_pieces(piece)
-
         possible_pieces = []
-        for piece in pieces:
-            if dest_coordinates in piece.get_valid_moves():
+        for piece in self._current_team.get_pieces(piece):
+            if dest in piece.get_moves():
                 possible_pieces.append(piece)
 
         if len(possible_pieces) == 0:
-            raise InvalidMove(dest_coordinates)
+            raise InvalidMove(dest)
         elif len(possible_pieces) == 1:
             return possible_pieces[0]
         else:
             print("MULTIPLE PIECES FOUND NOT GOOD")
             return possible_pieces[0]
 
-    def _get_valid_moves_and_captures(self, piece: Piece) -> Set[Tuple[int, int]]:
+    def print_board(self) -> None:
+        """Print current chess board to terminal."""
+        print(f"Current turn: {self._current_team.color.name}")
+        for row in range(NUM_OF_ROWS):
+            print()
+            for col in range(NUM_OF_COLS):
+                piece = self._board[row][col] if self._board[row][col] else "--"
+                print("| " + str(piece) + " |", end="")
+
+    def _calculate_piece_moves(self, piece: Piece) -> Set[Tuple[int, int]]:
         """Get the valid moves and captures of a given piece.
 
         This method finds all the valid moves and captures of a piece given its current coordinates.
@@ -192,108 +209,50 @@ class Board:
         Returns:
             Set[Tuple[int, int]]: The set of valid coordinates the piece can move to.
         """
-        valid_moves = set()
+        # determine valid moves, cannot move past a piece in a given direction
+        moves = set()
         for direction in piece.get_possible_moves():
             for move in direction:
                 if self._is_vacant(move):
-                    valid_moves.add(move)
+                    moves.add(move)
                 else:
                     break
 
-        valid_captures = set()
+        # determine valid captures, once you capture a piece in a given direction, cannot capture pieces afterwards
+        captures = set()
         for direction in piece.get_possible_captures():
-            for move in direction:
-                if not self._is_vacant(move) and self._is_capture(piece, move):
-                    valid_captures.add(move)
+            for capture in direction:
+                if str(piece) == "BP":
+                    print(capture)
+                if self._is_capture(piece, capture):
+                    print(f"capture")
+                    captures.add(capture)
                     break
 
-        return valid_moves.union(valid_captures)
+        valid_moves = moves.union(captures)
 
-    def get_valid_castles(self) -> bool:
-        # check king has not moved
-        # check at least one of rooks have not moved
-        # check spaces between rook(s) and king are vacant
-        # check king is not in check
-        # check path king takes to castle does not put king in check
-        # return True if all the above is satisfied
-        king = self._current_team.get_king()
-        rooks = self._current_team.get_pieces(PieceEnum.ROOK)
+        return valid_moves
 
-        # check if king has moved
-        if king.has_moved:
-            return []
-
-        # check if rook(s) exist that have not moved
-        rooks = [rook for rook in rooks if not rook.has_moved]
-        if len(rooks) == 0:
-            return []
-
-        # check vacant path to rooks
-        clear_path_to_rooks = []
-        for rook in rooks:
-            k_row, k_col = king.coordinates
-            r_row, r_col = rook.coordinates
-            if k_col > r_col:  # king is to right of rook
-                new_col = k_col - 1
-                while new_col != r_col:
-                    if not self._is_vacant((k_row, new_col)):
-                        break
-                    new_col -= 1
-                if new_col == r_col:
-                    clear_path_to_rooks.append(rook)
-            elif k_col < r_col:  # king is to left of rook
-                new_col = k_col + 1
-                while new_col != r_col:
-                    if not self._is_vacant((k_row, new_col)):
-                        break
-                    new_col += 1
-                if new_col == r_col:
-                    clear_path_to_rooks.append(rook)
-        if len(clear_path_to_rooks) == 0:
-            return []
-
-        # check if king is under attack
-        if self.is_under_attack(king.coordinates):
-            return []
-
-        possible_castles = []
-        for rook in clear_path_to_rooks:
-            k_row, k_col = king.coordinates
-            r_row, r_col = rook.coordinates
-            if k_col > r_col:  # move king two spaces to left
-                for i in range(2):
-                    try:
-                        self.move_piece(king.coordinates, (k_row, k_col - i - 1))
-                    except InvalidMove:
-                        break
-                if king.coordinates == (k_row, k_col - 2):
-                    possible_castles.append(rook)
-                    self.move_piece(king.coordinates, (k_row, k_col))
-            elif k_col < r_col:  # move king two spaces to right
-                for i in range(2):
-                    try:
-                        self.move_piece(king.coordinates, (k_row, k_col + i + 1))
-                    except InvalidMove:
-                        break
-                if king.coordinates == (k_row, k_col + 2):
-                    possible_castles.append(rook)
-                    self._place_piece(king, (k_row, k_col))
-
-        return possible_castles
-
-    def is_under_attack(self, piece: Piece) -> bool:
-        """Determines if current team is in a check position.
+    def is_attacked(self, team: Team, coordinates: Tuple[int, int]) -> bool:
+        """Determines if the given coordinates are attacked by opposing team.
 
         Returns:
-            bool: True if current team is in a check position. Otherwise, False.
+            bool: True if the given coordinates are attacked by opposing team. Otherwise, False.
         """
-        enemy_valid_moves = set()
-        for enemy in self._opposing_team.get_all_pieces():
-            enemy_valid_moves.update(enemy.get_valid_moves())
-
-        if piece.coordinates in enemy_valid_moves:
-            return True
+        for _, move in team.get_moves():
+            if coordinates == move:
+                return True
         return False
+
+    def is_check(self, team: Team) -> bool:
+        """Determines if current team is in check position.
+
+        Returns:
+            bool: True if the curret team is in check position. Otherwise, False
+        """
+        king_coordinates = team.get_king().coordinates
+        enemy = self._black if team.color == Color.WHITE else self._white
+        return self.is_attacked(enemy, king_coordinates)
 
     def is_checkmate(self) -> bool:
         """Determines if current team is in a checkmate position.
@@ -303,27 +262,11 @@ class Board:
         """
         king = self._current_team.get_king()
 
-        if not self.is_under_attack(king):
+        if not self.is_check():
             return False
 
-        enemy_valid_moves = set()
-        for enemy in self._opposing_team.get_all_pieces():
-            enemy_valid_moves.update(enemy.get_valid_moves())
-
-        # king can escape itself
-        for move in king.get_valid_moves():
-            if move not in enemy_valid_moves:
+        for piece, move in self._current_team.get_moves():
+            self._move_piece(piece, move)
+            if not self.is_check():
                 return False
-
-        friendly_moves = set()
-        for piece in self._current_team.get_all_pieces():
-            if not piece is not king:
-                friendly_moves.update(piece.get_valid_moves())
-
-        for move in friendly_moves:
-            self._place_piece(Pawn(self._current_team.color, move), move)
-            if not self.is_under_attack(king):
-                self._pickup_piece(move)
-                return False
-            self._pickup_piece(move)
         return True
