@@ -4,11 +4,11 @@ CHESS_BOARDS_DIR = "./tests/test_knight/chessboards/"
 
 
 def test_knight_move(chess_board_reader: ChessBoardReader) -> None:
-    board = chess_board_reader.read_chess_board(
+    chess_engine = chess_board_reader.read_chess_board(
         file_path=f"{CHESS_BOARDS_DIR}knight-move.txt"
     )
-    black_knight_moves = board._get_piece((2, 2)).get_moves()
-    white_knight_moves = board._get_piece((5, 2)).get_moves()
+    black_knight_moves = chess_engine.get_piece((2, 2)).get_moves()
+    white_knight_moves = chess_engine.get_piece((5, 2)).get_moves()
     assert black_knight_moves == {
         (4, 3),
         (4, 1),
@@ -32,11 +32,11 @@ def test_knight_move(chess_board_reader: ChessBoardReader) -> None:
 
 
 def test_knight_capture(chess_board_reader: ChessBoardReader) -> None:
-    board = chess_board_reader.read_chess_board(
+    chess_engine = chess_board_reader.read_chess_board(
         file_path=f"{CHESS_BOARDS_DIR}knight-capture.txt"
     )
-    black_knight_moves = board._get_piece((2, 2)).get_moves()
-    white_knight_moves = board._get_piece((5, 2)).get_moves()
+    black_knight_moves = chess_engine.get_piece((2, 2)).get_moves()
+    white_knight_moves = chess_engine.get_piece((5, 2)).get_moves()
     assert black_knight_moves == {
         (4, 3),
         (4, 1),

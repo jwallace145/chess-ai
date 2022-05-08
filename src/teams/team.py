@@ -85,7 +85,7 @@ class Team:
         Args:
             piece (Piece): The chess piece.
         """
-        self.pieces.get(piece.name).add(piece)
+        self.pieces[piece.name].add(piece)
 
     def get_moves(self) -> Set[Tuple[Piece, Tuple[int, int]]]:
         """Get all the valid moves for the given team.

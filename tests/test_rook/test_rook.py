@@ -4,11 +4,11 @@ CHESS_BOARDS_DIR = "./tests/test_rook/chessboards/"
 
 
 def test_rook_move(chess_board_reader: ChessBoardReader) -> None:
-    board = chess_board_reader.read_chess_board(
+    chess_engine = chess_board_reader.read_chess_board(
         file_path=f"{CHESS_BOARDS_DIR}rook-move.txt"
     )
-    black_rook_moves = board._get_piece((0, 7)).get_moves()
-    white_rook_moves = board._get_piece((7, 0)).get_moves()
+    black_rook_moves = chess_engine.get_piece((0, 7)).get_moves()
+    white_rook_moves = chess_engine.get_piece((7, 0)).get_moves()
     assert black_rook_moves == {
         (0, 6),
         (0, 5),
@@ -35,11 +35,11 @@ def test_rook_move(chess_board_reader: ChessBoardReader) -> None:
 
 
 def test_rook_capture(chess_board_reader: ChessBoardReader) -> None:
-    board = chess_board_reader.read_chess_board(
+    chess_engine = chess_board_reader.read_chess_board(
         file_path=f"{CHESS_BOARDS_DIR}rook-capture.txt"
     )
-    black_rook_moves = board._get_piece((1, 6)).get_moves()
-    white_rook_moves = board._get_piece((6, 1)).get_moves()
+    black_rook_moves = chess_engine.get_piece((1, 6)).get_moves()
+    white_rook_moves = chess_engine.get_piece((6, 1)).get_moves()
     assert black_rook_moves == {(1, 5), (1, 4), (1, 7), (0, 6), (2, 6), (3, 6)}
     assert white_rook_moves == {
         (5, 1),

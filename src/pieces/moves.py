@@ -5,10 +5,10 @@ MOVE_UP = [(-r, 0) for r in range(1, NUM_OF_ROWS)]
 MOVE_DOWN = [(r, 0) for r in range(1, NUM_OF_ROWS)]
 MOVE_LEFT = [(0, -c) for c in range(1, NUM_OF_COLS)]
 MOVE_RIGHT = [(0, c) for c in range(1, NUM_OF_COLS)]
-MOVE_UP_RIGHT_DIAGONALLY = [(i, i) for i in range(1, NUM_OF_ROWS)]
-MOVE_UP_LEFT_DIAGONALLY = [(i, -i) for i in range(1, NUM_OF_ROWS)]
-MOVE_DOWN_RIGHT_DIAGONALLY = [(-i, -i) for i in range(1, NUM_OF_ROWS)]
-MOVE_DOWN_LEFT_DIAGONALLY = [(-i, i) for i in range(1, NUM_OF_ROWS)]
+MOVE_UP_RIGHT_DIAGONALLY = [(-i, i) for i in range(1, NUM_OF_ROWS)]
+MOVE_UP_LEFT_DIAGONALLY = [(-i, -i) for i in range(1, NUM_OF_ROWS)]
+MOVE_DOWN_RIGHT_DIAGONALLY = [(i, i) for i in range(1, NUM_OF_ROWS)]
+MOVE_DOWN_LEFT_DIAGONALLY = [(i, -i) for i in range(1, NUM_OF_ROWS)]
 
 
 # moves of length one (all directions)

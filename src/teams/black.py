@@ -1,41 +1,55 @@
-from typing_extensions import Self
+from dataclasses import dataclass, field
+from typing import Dict, Set
+
 from src.constants import Color, PieceEnum
 from src.pieces.bishop import Bishop
 from src.pieces.king import King
 from src.pieces.knight import Knight
 from src.pieces.pawn import Pawn
+from src.pieces.piece import Piece
 from src.pieces.queen import Queen
 from src.pieces.rook import Rook
+from src.teams.starting_coordinates import *
 from src.teams.team import Team
 
 
+@dataclass
 class Black(Team):
-    def __init__(self) -> None:
-        super().__init__(Color.BLACK)
 
-    def initialize(self) -> Self:
-        self.pieces = {
+    color: Color = Color.BLACK
+    pieces: Dict[PieceEnum, Set[Piece]] = field(
+        default_factory=lambda: {
             PieceEnum.PAWN: set(
                 [
-                    Pawn(Color.BLACK, (1, 0)),
-                    Pawn(Color.BLACK, (1, 1)),
-                    Pawn(Color.BLACK, (1, 2)),
-                    Pawn(Color.BLACK, (1, 3)),
-                    Pawn(Color.BLACK, (1, 4)),
-                    Pawn(Color.BLACK, (1, 5)),
-                    Pawn(Color.BLACK, (1, 6)),
-                    Pawn(Color.BLACK, (1, 7)),
+                    Pawn(Color.BLACK, BLACK_PAWN_A7),
+                    Pawn(Color.BLACK, BLACK_PAWN_B7),
+                    Pawn(Color.BLACK, BLACK_PAWN_C7),
+                    Pawn(Color.BLACK, BLACK_PAWN_D7),
+                    Pawn(Color.BLACK, BLACK_PAWN_E7),
+                    Pawn(Color.BLACK, BLACK_PAWN_F7),
+                    Pawn(Color.BLACK, BLACK_PAWN_G7),
+                    Pawn(Color.BLACK, BLACK_PAWN_H7),
                 ]
             ),
-            PieceEnum.ROOK: set([Rook(Color.BLACK, (0, 0)), Rook(Color.BLACK, (0, 7))]),
+            PieceEnum.ROOK: set(
+                [Rook(Color.BLACK, BLACK_ROOK_A8), Rook(Color.BLACK, BLACK_ROOK_H8)]
+            ),
             PieceEnum.KNIGHT: set(
-                [Knight(Color.BLACK, (0, 1)), Knight(Color.BLACK, (0, 6))]
+                [
+                    Knight(Color.BLACK, BLACK_KNIGHT_B8),
+                    Knight(Color.BLACK, BLACK_KNIGHT_G8),
+                ]
             ),
             PieceEnum.BISHOP: set(
-                [Bishop(Color.BLACK, (0, 2)), Bishop(Color.BLACK, (0, 5))]
+                [
+                    Bishop(Color.BLACK, BLACK_BISHOP_C8),
+                    Bishop(Color.BLACK, BLACK_BISHOP_F8),
+                ]
             ),
-            PieceEnum.QUEEN: set([Queen(Color.BLACK, (0, 3))]),
-            PieceEnum.KING: set([King(Color.BLACK, (0, 4))]),
+            PieceEnum.QUEEN: set([Queen(Color.BLACK, BLACK_QUEEN_D8)]),
+            PieceEnum.KING: set([King(Color.BLACK, BLACK_KING_E8)]),
         }
-        self.set_pieces(self.pieces)
-        return self
+    )
+
+    def __post_init__(self) -> None:
+        super().__init__(self.color, self.pieces)
