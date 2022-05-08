@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Literal, Set, Tuple
 
-from src.constants import Color, PieceEnum
+from src.constants import Color, PieceName
 from src.pieces.king import King
 from src.pieces.piece import Piece
 
@@ -11,14 +11,14 @@ class Team:
     """Chess Team Base Class"""
 
     color: Literal[Color.BLACK, Color.WHITE]
-    pieces: Dict[PieceEnum, Set[Piece]] = field(
+    pieces: Dict[PieceName, Set[Piece]] = field(
         default_factory=lambda: {
-            PieceEnum.PAWN: set(),
-            PieceEnum.ROOK: set(),
-            PieceEnum.KNIGHT: set(),
-            PieceEnum.BISHOP: set(),
-            PieceEnum.QUEEN: set(),
-            PieceEnum.KING: set(),
+            PieceName.PAWN: set(),
+            PieceName.ROOK: set(),
+            PieceName.KNIGHT: set(),
+            PieceName.BISHOP: set(),
+            PieceName.QUEEN: set(),
+            PieceName.KING: set(),
         }
     )
 
@@ -43,8 +43,8 @@ class Team:
         Returns:
             King: The king piece.
         """
-        king = self.pieces.get(PieceEnum.KING).pop()
-        self.pieces.get(PieceEnum.KING).add(king)
+        king = self.pieces.get(PieceName.KING).pop()
+        self.pieces.get(PieceName.KING).add(king)
         return king
 
     def get_piece(self, coordinates: Tuple[int, int]) -> Piece:
@@ -60,22 +60,22 @@ class Team:
             if piece.coordinates == coordinates:
                 return piece
 
-    def get_pieces(self, piece: PieceEnum) -> Set[Piece]:
+    def get_pieces(self, piece: PieceName) -> Set[Piece]:
         """Get all the pieces of same type (aka Pawns, Rooks, etc).
 
         Args:
-            piece (PieceEnum): The type of piece.
+            piece (PieceName): The type of piece.
 
         Returns:
             Set[Piece]: The set of chess pieces of the given type.
         """
         return self.pieces.get(piece)
 
-    def set_pieces(self, pieces: Dict[PieceEnum, Set[Piece]]) -> None:
+    def set_pieces(self, pieces: Dict[PieceName, Set[Piece]]) -> None:
         """Set the pieces dictionary.
 
         Args:
-            pieces (Dict[PieceEnum, Set[Piece]]): The pieces dictionary of all the chess pieces on a given team.
+            pieces (Dict[PieceName, Set[Piece]]): The pieces dictionary of all the chess pieces on a given team.
         """
         self.pieces = pieces
 

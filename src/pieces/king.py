@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from src.constants import Color, PieceEnum
+from src.constants import Color, PieceName
 from src.pieces.piece import Piece
 from src.pieces.moves import (
     MOVE_UP_ONE,
@@ -27,4 +27,4 @@ class King(Piece):
             MOVE_DOWN_LEFT_DIAGONALLY_ONE,
         ]
         self.captures = self.moves
-        super().__init__(PieceEnum.KING, color, coordinates, self.moves, self.captures)
+        super().__init__(PieceName.KING, color, coordinates, self.moves, self.captures)

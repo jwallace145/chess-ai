@@ -12,7 +12,7 @@ class Color(Enum):
     WHITE = "W"
 
 
-class PieceEnum(Enum):
+class PieceName(Enum):
     """Chess Piece Name Enum"""
 
     PAWN = "P"
@@ -32,12 +32,12 @@ class MenuOption(Enum):
 
 """Chess Piece Values Dictionary"""
 PIECE_VALUE = {
-    PieceEnum.PAWN: 1,
-    PieceEnum.ROOK: 5,
-    PieceEnum.BISHOP: 3,
-    PieceEnum.KNIGHT: 3,
-    PieceEnum.QUEEN: 9,
-    PieceEnum.KING: 1000,
+    PieceName.PAWN: 1,
+    PieceName.ROOK: 5,
+    PieceName.BISHOP: 3,
+    PieceName.KNIGHT: 3,
+    PieceName.QUEEN: 9,
+    PieceName.KING: 1000,
 }
 
 """Chess Board Columns Dictionary"""
@@ -46,10 +46,10 @@ COLUMNS = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
 
 """Chess Board Piece Dictionary"""
 PIECES = {
-    "p": PieceEnum.PAWN,
-    "r": PieceEnum.ROOK,
-    "b": PieceEnum.BISHOP,
-    "n": PieceEnum.KNIGHT,
-    "q": PieceEnum.QUEEN,
-    "k": PieceEnum.KING,
+    "p": PieceName.PAWN,
+    "r": PieceName.ROOK,
+    "b": PieceName.BISHOP,
+    "n": PieceName.KNIGHT,
+    "q": PieceName.QUEEN,
+    "k": PieceName.KING,
 }

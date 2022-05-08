@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from src.constants import PieceEnum, Color
+from src.constants import PieceName, Color
 from src.pieces.piece import Piece
 from src.pieces.moves import (
     MOVE_UP_RIGHT_DIAGONALLY,
@@ -20,5 +20,5 @@ class Bishop(Piece):
         ]
         self.captures = self.moves
         super().__init__(
-            PieceEnum.BISHOP, color, coordinates, self.moves, self.captures
+            PieceName.BISHOP, color, coordinates, self.moves, self.captures
         )

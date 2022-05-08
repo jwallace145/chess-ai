@@ -1,12 +1,8 @@
 from dataclasses import dataclass, field
-from typing import List, Set, Tuple
+from typing import List, Tuple
 
-from src.constants import NUM_OF_COLS, NUM_OF_ROWS, Color, PieceEnum
-from src.exceptions import InvalidMove
+from src.constants import NUM_OF_COLS, NUM_OF_ROWS
 from src.pieces.piece import Piece
-from src.teams.black import Black
-from src.teams.team import Team
-from src.teams.white import White
 
 
 @dataclass
@@ -113,14 +109,14 @@ class Board:
         row, col = dest
         self._board[row][col] = piece
 
-    # def find_piece(self, piece: PieceEnum, dest: Tuple[int, int]) -> Piece:
+    # def find_piece(self, , dest: Tuple[int, int]) -> Piece:
     #     """Find chess piece given the type of chess piece and destination coordinates.
 
     #     This method is helpful for finding the desired chess piece given a move in the
     #     syntax "P E4". This means move current team Pawn to square E4 (4,4).
 
     #     Args:
-    #         piece (PieceEnum): The type of chess piece
+    #         piece : The type of chess piece
     #         dest (Tuple[int, int]): The destination coordinates of the given chess piece.
 
     #     Raises:

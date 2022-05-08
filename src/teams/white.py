@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Set
 
-from src.constants import Color, PieceEnum
+from src.constants import Color, PieceName
 from src.pieces.bishop import Bishop
 from src.pieces.king import King
 from src.pieces.knight import Knight
@@ -17,9 +17,9 @@ from src.teams.team import Team
 class White(Team):
 
     color: Color = Color.WHITE
-    pieces: Dict[PieceEnum, Set[Piece]] = field(
+    pieces: Dict[PieceName, Set[Piece]] = field(
         default_factory=lambda: {
-            PieceEnum.PAWN: set(
+            PieceName.PAWN: set(
                 [
                     Pawn(Color.WHITE, WHITE_PAWN_A2),
                     Pawn(Color.WHITE, WHITE_PAWN_B2),
@@ -31,26 +31,26 @@ class White(Team):
                     Pawn(Color.WHITE, WHITE_PAWN_H2),
                 ]
             ),
-            PieceEnum.ROOK: set(
+            PieceName.ROOK: set(
                 [
                     Rook(Color.WHITE, WHITE_ROOK_A1),
                     Rook(Color.WHITE, WHITE_ROOK_H1),
                 ]
             ),
-            PieceEnum.KNIGHT: set(
+            PieceName.KNIGHT: set(
                 [
                     Knight(Color.WHITE, WHITE_KNIGHT_B1),
                     Knight(Color.WHITE, WHITE_KNIGHT_G1),
                 ]
             ),
-            PieceEnum.BISHOP: set(
+            PieceName.BISHOP: set(
                 [
                     Bishop(Color.WHITE, WHITE_BISHOP_C1),
                     Bishop(Color.WHITE, WHITE_BISHOP_F1),
                 ]
             ),
-            PieceEnum.QUEEN: set([Queen(Color.WHITE, WHITE_QUEEN_D1)]),
-            PieceEnum.KING: set([King(Color.WHITE, WHITE_KING_E1)]),
+            PieceName.QUEEN: set([Queen(Color.WHITE, WHITE_QUEEN_D1)]),
+            PieceName.KING: set([King(Color.WHITE, WHITE_KING_E1)]),
         }
     )
 

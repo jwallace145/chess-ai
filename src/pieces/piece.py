@@ -1,22 +1,21 @@
 from dataclasses import dataclass
 from typing import List, Literal, Tuple, Set
 
-from src.constants import NUM_OF_COLS, NUM_OF_ROWS, PIECE_VALUE, Color, PieceEnum
+from src.constants import (
+    NUM_OF_COLS,
+    NUM_OF_ROWS,
+    PIECE_VALUE,
+    Color,
+    PieceName,
+)
 
 
 @dataclass
 class Piece:
     """Piece Base Class"""
 
-    name: Literal[
-        PieceEnum.PAWN,
-        PieceEnum.ROOK,
-        PieceEnum.BISHOP,
-        PieceEnum.KNIGHT,
-        PieceEnum.QUEEN,
-        PieceEnum.KING,
-    ]
-    color: Literal[Color.BLACK, Color.WHITE]
+    name: PieceName
+    color: Color
     coordinates: Tuple[int, int]
     _moves: List[List[Tuple[int, int]]]
     _captures: List[List[Tuple[int, int]]]

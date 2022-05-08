@@ -21,8 +21,9 @@ class ChessEngine:
         self._calculate_team_moves(self._white)
 
     def _set_board(self) -> None:
-        for piece in self._black.get_all_pieces().union(self._white.get_all_pieces()):
-            self._board.put_piece(piece, piece.coordinates)
+        for team in [self._black, self._white]:
+            for piece in team.get_all_pieces():
+                self._board.put_piece(piece, piece.coordinates)
 
     def _calculate_team_moves(self, team: Team) -> None:
         for piece in team.get_all_pieces():

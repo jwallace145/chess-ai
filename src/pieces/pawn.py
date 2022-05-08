@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from src.constants import Color, PieceEnum
+from src.constants import Color, PieceName
 from src.pieces.moves import (
     MOVE_DOWN_LEFT_DIAGONALLY_ONE,
     MOVE_DOWN_ONE,
@@ -28,7 +28,7 @@ class Pawn(Piece):
                 MOVE_UP_RIGHT_DIAGONALLY_ONE,
                 MOVE_UP_LEFT_DIAGONALLY_ONE,
             ]
-        super().__init__(PieceEnum.PAWN, color, coordinates, self.moves, self.captures)
+        super().__init__(PieceName.PAWN, color, coordinates, self.moves, self.captures)
 
     def get_possible_moves(self) -> List[List[Tuple[int, int]]]:
         if self.has_moved:
