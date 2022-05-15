@@ -15,14 +15,18 @@ class Board:
         ]
     )
 
-    def _move_piece(self, piece: Piece, dest: Tuple[int, int]) -> None:
+    def get_board(self) -> List[List[Piece]]:
+        return [
+            [self._board[row][col] for col in range(NUM_OF_COLS)]
+            for row in range(NUM_OF_ROWS)
+        ]
+
+    def move_piece(self, piece: Piece, dest: Tuple[int, int]) -> Piece:
         self._pickup_piece(piece)
-        if self._is_vacant(dest):
-            # if vacant, just place piece
+        if self.is_vacant(dest):
             self.put_piece(piece, dest)
-        elif self._is_capture(piece, dest):
-            # if occupied by enemy piece, capture piece, aka remove from board and enemy team then place piece
-            self._capture_piece(piece, dest)
+        elif self.is_capture(piece, dest):
+            return self.capture_piece(piece, dest)
 
     def is_vacant(self, coordinates: Tuple[int, int]) -> bool:
         """Determine if the given cell is vacant or occupied.
@@ -79,20 +83,21 @@ class Board:
         """
         if piece:
             row, col = piece.coordinates
+            piece.has_moved = True
             self._board[row][col] = None
             return piece
         elif coordinates:
             row, col = coordinates
             piece = self._board[row][col]
             self._board[row][col] = None
+            piece.has_moved = True
             return piece
         else:
             raise Exception
 
-    def _capture_piece(self, piece: Piece, dest: Tuple[int, int]) -> Piece:
-        captured_piece = self._get_piece(dest)
-        self._opposing_team.remove_piece(captured_piece)
-        self._place_piece(piece, dest)
+    def capture_piece(self, piece: Piece, dest: Tuple[int, int]) -> Piece:
+        captured_piece = self._pickup_piece(coordinates=dest)
+        self.put_piece(piece, dest)
         return captured_piece
 
     def put_piece(self, piece: Piece, dest: Tuple[int, int]) -> None:

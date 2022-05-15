@@ -13,6 +13,7 @@ pytest = "*"
 pylint = "*"
 flake8 = "*"
 pytest-cov = "*"
+behave = "*"
 
 [requires]
 python_version = "3.8"

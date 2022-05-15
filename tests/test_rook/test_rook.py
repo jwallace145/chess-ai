@@ -51,3 +51,11 @@ def test_rook_capture(chess_board_reader: ChessBoardReader) -> None:
         (7, 1),
         (6, 0),
     }
+
+
+def test_cannot_move_rook_into_check(chess_board_reader: ChessBoardReader) -> None:
+    chess_engine = chess_board_reader.read_chess_board(
+        file_path=f"{CHESS_BOARDS_DIR}cannot-move-rook-into-check.txt"
+    )
+    white_rook_moves = chess_engine.get_piece((7, 3)).get_moves()
+    assert white_rook_moves == {(7, 0), (7, 1), (7, 2)}

@@ -39,3 +39,13 @@ def test_king_capture(chess_board_reader: ChessBoardReader) -> None:
     white_king_moves = chess_engine.get_piece((7, 4)).get_moves()
     assert black_king_moves == {(1, 4), (0, 3), (0, 5), (1, 3), (1, 5)}
     assert white_king_moves == {(6, 4), (7, 3), (7, 5), (6, 3), (6, 5)}
+
+
+def test_cannot_move_king_into_check(chess_board_reader: ChessBoardReader) -> None:
+    chess_engine = chess_board_reader.read_chess_board(
+        file_path=f"{CHESS_BOARDS_DIR}cannot-move-king-into-check.txt"
+    )
+    black_king_moves = chess_engine.get_piece((0, 4)).get_moves()
+    white_king_moves = chess_engine.get_piece((7, 4)).get_moves()
+    assert black_king_moves == {(0, 3), (0, 5)}
+    assert white_king_moves == {(7, 3), (7, 5)}

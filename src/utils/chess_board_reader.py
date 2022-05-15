@@ -74,6 +74,6 @@ class ChessBoardReader:
                             PIECE_CONSTRUCTORS[piece.lower()](Color.WHITE, (row, col)),
                         )
 
-        chess_engine = ChessEngine(self._black, self._white)
+        chess_engine = ChessEngine(Board(), self._black, self._white)
 
         return chess_engine

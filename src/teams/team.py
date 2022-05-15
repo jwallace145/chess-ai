@@ -96,7 +96,7 @@ class Team:
         valid_moves = set()
         for piece in self.get_all_pieces():
             for move in piece.get_moves():
-                valid_moves.add((piece, move))
+                valid_moves.add((piece.coordinates, move))
         return valid_moves
 
     def get_valid_moves_except_king(self) -> Set[Tuple[int, int]]:

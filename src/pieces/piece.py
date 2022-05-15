@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Literal, Tuple, Set
+from typing import List, Tuple, Set
 
 from src.constants import (
     NUM_OF_COLS,
@@ -29,7 +29,7 @@ class Piece:
         return self._valid_moves
 
     def set_moves(self, valid_moves: Set[Tuple[int, int]]) -> None:
-        self._valid_moves = valid_moves
+        self._valid_moves = set(valid_moves)
 
     def get_possible_moves(self) -> List[List[Tuple[int, int]]]:
         """Get possible moves given the piece's current coordinates and move vectors.

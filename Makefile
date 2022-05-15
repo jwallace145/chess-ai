@@ -9,3 +9,6 @@ run:
 
 test:
 	pipenv run pytest tests --cov=src
+
+behave:
+	pipenv run behave tests/features
